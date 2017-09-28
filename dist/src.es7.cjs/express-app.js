@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http = require("http");
 const express = require("express");
 const uuid = require("uuid");
-const body_parser_1 = require("body-parser");
+const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
@@ -36,11 +36,12 @@ async function factory(dependencies = {}) {
     });
     // TODO activate CORS
     app.use(helmet());
-    app.use(body_parser_1.urlencoded({
+    app.use(bodyParser.urlencoded({
         extended: false,
         parameterLimit: 100,
         limit: '1Mb',
     }));
+    app.use(bodyParser.json());
     app.use(await routes_1.factory({
         logger,
     }));

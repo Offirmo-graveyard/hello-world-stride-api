@@ -1,7 +1,7 @@
 import * as http from 'http'
 import * as express from 'express'
 import * as uuid from 'uuid'
-import { urlencoded as bodyUrlencodedParser} from 'body-parser'
+import * as bodyParser from 'body-parser'
 import * as morgan from 'morgan'
 import * as helmet from 'helmet'
 import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
@@ -51,11 +51,13 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	// TODO activate CORS
 	app.use(helmet())
 
-	app.use(bodyUrlencodedParser({
+
+	app.use(bodyParser.urlencoded({
 		extended: false,
 		parameterLimit: 100, // less than the default
 		limit: '1Mb', // for profile image
 	}))
+	app.use(bodyParser.json())
 
 	app.use(await routesFactory({
 		logger,

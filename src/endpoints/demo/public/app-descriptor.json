@@ -1,0 +1,18 @@
+{
+	"baseUrl": "http://f564e955.ngrok.io/demo",
+	"key": "demo-app",
+	"lifecycle": {
+		"installed": "/installed",
+		"uninstalled": "/uninstalled"
+	},
+	"modules": {
+		"chat:bot": [
+			{
+				"key": "demo-bot",
+				"mention": {
+					"url": "/bot-mentioned"
+				}
+			}
+		]
+	}
+}
