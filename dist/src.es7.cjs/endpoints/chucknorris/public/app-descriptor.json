@@ -1,0 +1,8 @@
+{
+	"baseUrl": "http://f564e955.ngrok.io/chucknorris",
+	"key": "chuck-norris-app",
+	"lifecycle": {
+		"installed": "/installed",
+		"uninstalled": "/uninstalled"
+	}
+}

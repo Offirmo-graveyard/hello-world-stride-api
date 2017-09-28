@@ -1,0 +1,10 @@
+# logs
+npm-debug.log
+npm-debug.log*
+yarn-error.log
+
+# Dependency directories
+node_modules
+
+# secrets
+.env
