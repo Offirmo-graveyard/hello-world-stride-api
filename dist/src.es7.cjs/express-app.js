@@ -5,7 +5,6 @@ const express = require("express");
 const uuid = require("uuid");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const helmet = require("helmet");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
 const routes_1 = require("./routes");
 const defaultDependencies = {
@@ -31,11 +30,12 @@ async function factory(dependencies = {}) {
             uuid: req.uuid,
             method: morgan['method'](req),
             url: morgan['url'](req),
-        });
+            referrer: morgan['referrer'](req),
+        }, 'request received.');
         next();
     });
     // TODO activate CORS
-    app.use(helmet());
+    //app.use(helmet())
     app.use(bodyParser.urlencoded({
         extended: false,
         parameterLimit: 100,

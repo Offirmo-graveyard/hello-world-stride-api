@@ -44,12 +44,13 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			uuid: req.uuid,
 			method: (morgan as any)['method'](req),
 			url: (morgan as any)['url'](req),
-		})
+			referrer: (morgan as any)['referrer'](req),
+		}, 'request received.')
 		next()
 	})
 
 	// TODO activate CORS
-	app.use(helmet())
+	//app.use(helmet())
 
 
 	app.use(bodyParser.urlencoded({

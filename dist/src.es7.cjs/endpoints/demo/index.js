@@ -30,6 +30,7 @@ async function factory(dependencies = {}) {
     // https://expressjs.com/en/starter/static-files.html
     // REM: respond with index.html when a GET request is made to the homepage
     app.use(express.static(path.join(__dirname, 'public')));
+    app.use(stride.validateJWT);
     app.post('/installed', (req, res, next) => {
         let logDetails = {
             endpoint: req.path,
@@ -78,25 +79,25 @@ async function factory(dependencies = {}) {
                 conversationId,
                 senderId });
             logger.info(logDetails, 'bot mentioned in a conversation');
-            console.log('------\nfull body\n', misc_1.prettify_json(req.body));
-            console.log('------\ndocument\n', misc_1.prettify_json(document));
+            //console.log('------\nfull body\n', prettify_json(req.body))
+            //console.log('------\ndocument\n', prettify_json(document))
             stride.sendTextMessage({ cloudId, conversationId, text: '"stride.sendTextMessage()"' });
-            stride.sendDocumentMessage({
+            /*stride.sendDocumentMessage({
                 cloudId,
                 conversationId,
                 documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
-            });
+            })
             stride.sendUserMessage({
                 cloudId,
                 userId: senderId,
                 documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
-            });
-            stride.getConversation({ cloudId, conversationId }).then(conversation => {
-                console.log('getConversation():\n', misc_1.prettify_json(conversation));
-                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!` });
-            });
-            stride.getUser({ cloudId, userId: senderId }).then(user => {
-                console.log('getUser():\n', misc_1.prettify_json(user));
+            })
+            stride.getConversation({cloudId, conversationId}).then(conversation => {
+                console.log('getConversation():\n', prettify_json(conversation))
+                return stride.sendTextMessage({cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!`})
+            })
+            stride.getUser({cloudId, userId: senderId}).then(user => {
+                console.log('getUser():\n', prettify_json(user))
                 const documentMessage = {
                     version: 1,
                     type: "doc",
@@ -118,16 +119,18 @@ async function factory(dependencies = {}) {
                             ]
                         }
                     ]
-                };
+                }
+
                 return stride.sendDocumentMessage({
                     cloudId,
                     conversationId,
-                    documentMessage /*: stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`) */
-                });
-            });
+                    documentMessage : stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`)
+                })
+            })
             stride.convertDocToText(document).then(msg => {
-                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?` });
-            });
+                return stride.sendTextMessage({cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?`})
+            })
+    */
             /*
             stride.createConversation({
                 cloudId,
@@ -167,6 +170,32 @@ async function factory(dependencies = {}) {
                     documentMessage: stride.convertTextToDoc(`Ah ah, I knew that you wanted to be my disciple, ${user.displayName}!`)
                 });
             });
+            res.sendStatus(204);
+        })()
+            .catch(next);
+    });
+    app.get('/glance-state', 
+    // cross domain request
+    //cors(),
+    function (req, res) {
+        res.send(JSON.stringify({
+            "label": {
+                "value": "Click me!"
+            }
+        }));
+    });
+    app.post('/custom-request', (req, res, next) => {
+        let logDetails = {
+            APP_ID,
+            endpoint: req.path,
+            method: req.method,
+        };
+        (async function process() {
+            const { cloudId, conversationId } = req.strideContext;
+            const { requestId, senderId } = req.body;
+            logger.info(logDetails, 'bot received a custom request');
+            console.log('------\nfull body\n', misc_1.prettify_json(req.body));
+            stride.sendTextMessage({ cloudId, conversationId, text: '"stride.sendTextMessage()"' });
             res.sendStatus(204);
         })()
             .catch(next);

@@ -13,7 +13,7 @@
     "__prod": "~~~~~~ PRODUCTION ~~~~~~",
     "clean": "rm -rf dist",
     "transpile": "tsc --project meta/prod",
-    "copy-other-files": "cpx 'src/**/*.{dust,css,png,json}' dist/src.es7.cjs",
+    "copy-other-files": "cpx 'src/**/*.{dust,css,png,json,html}' dist/src.es7.cjs",
     "build": "npm-run-all clean --parallel transpile copy-other-files",
     "start": "node dist/src.es7.cjs/index.js",
     "__dev": "~~~~~~ DEVELOPMENT ~~~~~~",

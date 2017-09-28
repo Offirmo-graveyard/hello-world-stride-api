@@ -45,6 +45,8 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	// REM: respond with index.html when a GET request is made to the homepage
 	app.use(express.static(path.join(__dirname, 'public')))
 
+	app.use(stride.validateJWT)
+
 	app.post('/installed', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
 			endpoint: req.path,
@@ -113,11 +115,11 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			}
 
 			logger.info(logDetails,'bot mentioned in a conversation')
-			console.log('------\nfull body\n', prettify_json(req.body))
-			console.log('------\ndocument\n', prettify_json(document))
+			//console.log('------\nfull body\n', prettify_json(req.body))
+			//console.log('------\ndocument\n', prettify_json(document))
 
 			stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
-			stride.sendDocumentMessage({
+			/*stride.sendDocumentMessage({
 				cloudId,
 				conversationId,
 				documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
@@ -159,12 +161,13 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 				return stride.sendDocumentMessage({
 					cloudId,
 					conversationId,
-					documentMessage /*: stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`) */
+					documentMessage : stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`)
 				})
 			})
 			stride.convertDocToText(document).then(msg => {
 				return stride.sendTextMessage({cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?`})
 			})
+	*/
 			/*
 			stride.createConversation({
 				cloudId,
@@ -218,6 +221,41 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		})()
 			.catch(next)
 	})
+
+	app.get('/glance-state',
+		// cross domain request
+		//cors(),
+		function (req, res) {
+			res.send(
+				JSON.stringify({
+					"label": {
+						"value": "Click me!"
+					}
+				}));
+		});
+
+	app.post('/custom-request', (req: ExtendedRequest, res, next) => {
+		let logDetails: any = {
+			APP_ID,
+			endpoint: req.path,
+			method: req.method,
+		};
+
+		(async function process() {
+			const {cloudId, conversationId} = (req as any).strideContext
+			const {requestId, senderId} = req.body
+
+
+			logger.info(logDetails,'bot received a custom request')
+			console.log('------\nfull body\n', prettify_json(req.body))
+
+			stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
+
+			res.sendStatus(204)
+		})()
+			.catch(next)
+	})
+
 
 	return app
 }

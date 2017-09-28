@@ -16,6 +16,31 @@
 					"url": "/bot-directly-messaged"
 				}
 			}
+		],
+		"chat:sidebar": [
+			{
+				"key": "demo-app-sidebar",
+				"name": {
+					"value": "App Sidebar"
+				},
+				"url": "/sidebar.html",
+				"authentication": "jwt"
+			}
+		],
+		"chat:glance": [
+			{
+				"key": "demo-app-glance",
+				"name": {
+					"value": "App Glance"
+				},
+				"icon": {
+					"url": "/logo.png",
+					"url@2x": "/logo.png"
+				},
+				"target": "demo-app-sidebar",
+				"queryUrl": "/glance-state",
+				"authentication": "jwt"
+			}
 		]
 	}
 }
