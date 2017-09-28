@@ -71,28 +71,54 @@ async function factory(dependencies = {}) {
             logger.info(logDetails, 'bot mentioned in a conversation');
             console.log('------\nfull body\n', misc_1.prettify_json(req.body));
             console.log('------\ndocument\n', misc_1.prettify_json(document));
-            stride.sendTextMessage({ cloudId, conversationId, text: '"stride.sendTextMessage()"' });
+            /*stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
             stride.sendDocumentMessage({
                 cloudId,
                 conversationId,
                 documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
-            });
+            })
             stride.sendUserMessage({
                 cloudId,
                 userId: senderId,
                 documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
-            });
-            stride.getConversation({ cloudId, conversationId }).then(conversation => {
-                console.log('getConversation():\n', misc_1.prettify_json(conversation));
-                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!` });
-            });
+            })
+            stride.getConversation({cloudId, conversationId}).then(conversation => {
+                console.log('getConversation():\n', prettify_json(conversation))
+                return stride.sendTextMessage({cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!`})
+            })*/
             stride.getUser({ cloudId, userId: senderId }).then(user => {
                 console.log('getUser():\n', misc_1.prettify_json(user));
-                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!` });
+                const documentMessage = {
+                    version: 1,
+                    type: "doc",
+                    content: [
+                        {
+                            type: "paragraph",
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`,
+                                },
+                                {
+                                    type: "mention",
+                                    attrs: {
+                                        id: user.id,
+                                        text: user.nickName
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                };
+                return stride.sendDocumentMessage({
+                    cloudId,
+                    conversationId,
+                    documentMessage /*: stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`) */
+                });
             });
-            stride.convertDocToText(document).then(msg => {
-                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?` });
-            });
+            /*stride.convertDocToText(document).then(msg => {
+                return stride.sendTextMessage({cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?`})
+            })*/
             /*
             stride.createConversation({
                 cloudId,

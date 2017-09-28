@@ -1,12 +1,15 @@
+// see the stride API
+// https://developer.stg.internal.atlassian.com/cloud/stride/rest/
+
 const request = require('request')
 //const jwtUtil = require('jwt-simple')
+// TODO add validation middlewares
 
 
 function factory({clientId, clientSecret, logger = console, env = 'development'}) {
 	const API_BASE_URL = env === "production" ? 'https://api.atlassian.com' : 'https://api.stg.atlassian.com'
 	const API_AUDIENCE = env === "production" ? "api.atlassian.com" : "api.stg.atlassian.com"
 	const AUTH_API_BASE_URL = env === "production" ? 'https://auth.atlassian.com' : 'https://atlassian-account-stg.pus2.auth0.com'
-
 
 	function r2(options) {
 		let logDetails = {
