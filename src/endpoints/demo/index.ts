@@ -101,7 +101,42 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			logger.info(logDetails,'bot mentioned in a conversation')
 			console.log(prettify_json(req.body))
 
-			await stride.sendTextMessage({cloudId, conversationId, message: '"hello"'})
+			stride.sendTextMessage({cloudId, conversationId, message: '"sendTextMessage()"'})
+			stride.sendDocumentMessage({cloudId, conversationId, documentMessage: {
+				version: 1,
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [
+							{
+								type: "text",
+								text: '"sendDocumentMessage()"',
+							},
+						],
+					},
+				],
+			}})
+			stride.sendUserMessage({cloudId, userId: senderId, message: {
+				version: 1,
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [
+							{
+								type: "text",
+								text: '"sendUserMessage()"',
+							},
+						],
+					},
+				],
+			}})
+			Promise.resolve().then(async function() {
+				const conversation = await stride.getConversation({cloudId, conversationId})
+				console.log('getConversation():\n', prettify_json(conversation))
+				return stride.sendTextMessage({cloudId, conversationId, message: `nice room "${conversation.name}"!`})
+			})
 
 			res.sendStatus(204)
 		})()

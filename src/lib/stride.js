@@ -88,6 +88,44 @@ function factory({clientId, clientSecret, logger = console, env = 'development'}
 		return r2(options)
 	}
 
+	/** Send a private message to a user
+	 * https://developer.atlassian.com/cloud/stride/apis/rest/#api-site-cloudId-conversation-user-userId-message-post
+	 */
+	async function sendUserMessage({cloudId, userId, message}) {
+		const accessToken = await getAccessToken()
+		const options = {
+			uri: API_BASE_URL + '/site/' + cloudId + '/conversation/user/' + userId + '/message',
+			method: 'POST',
+			headers: {
+				authorization: "Bearer " + accessToken,
+				"cache-control": "no-cache"
+			},
+			json: {
+				body: message
+			}
+		}
+
+		return r2(options)
+	}
+
+	/**
+	 * https://developer.atlassian.com/cloud/stride/apis/rest/#api-site-cloudId-conversation-conversationId-get
+	 */
+	async function getConversation({cloudId, conversationId}) {
+		const accessToken = await getAccessToken()
+		const options = {
+			uri: API_BASE_URL + '/site/' + cloudId + '/conversation/' + conversationId,
+			method: 'GET',
+			headers: {
+				authorization: "Bearer " + accessToken,
+				"cache-control": "no-cache"
+			}
+		}
+
+		return r2(options)
+			.then(JSON.parse)
+	}
+
 	/**
 	 * Utility functions
 	 */
@@ -113,13 +151,15 @@ function factory({clientId, clientSecret, logger = console, env = 'development'}
 
 	return {
 		getAccessToken,
+
 		sendDocumentMessage,
+		sendUserMessage,
+		getConversation,
 
 		// utilities
 		sendTextMessage,
 		/*
-		sendUserMessage,
-		getConversation,
+		,
 		getUser,
 		createConversation,
 		archiveConversation,
