@@ -20,18 +20,14 @@ async function factory() {
 
 	process.on('uncaughtException', (err: ExtendedError) => {
 		console.error(`Uncaught exception!`, err)
-		setTimeout(() => process.exit(1), 250)
-		logger.fatal(err, `Uncaught exception!`)
-		// TODO cleanup
-		// I've an experimental module for that…
+		logger.error({err}, `Uncaught exception!`)
+		// no crash while we are stateless
 	})
 
 	process.on('unhandledRejection', (reason: ExtendedError | any, p: Promise<any>) => {
 		console.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
-		setTimeout(() => process.exit(1), 250)
-		logger.fatal({ reason, p }, `Uncaught rejection!`)
-		// TODO cleanup
-		// I've an experimental module for that…
+		logger.error({ reason, p }, `Uncaught rejection!`)
+		// no crash while we are stateless
 	})
 
 	process.on('warning', (warning: { name: string, message: string, stack: string}) => {

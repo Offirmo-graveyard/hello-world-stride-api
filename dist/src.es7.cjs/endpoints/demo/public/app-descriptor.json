@@ -1,5 +1,5 @@
 {
-	"baseUrl": "http://f564e955.ngrok.io/demo",
+	"baseUrl": "https://7282ab55.ngrok.io/demo",
 	"key": "demo-app",
 	"lifecycle": {
 		"installed": "/installed",
@@ -11,6 +11,9 @@
 				"key": "demo-bot",
 				"mention": {
 					"url": "/bot-mentioned"
+				},
+				"directMessage": {
+					"url": "/bot-directly-messaged"
 				}
 			}
 		]

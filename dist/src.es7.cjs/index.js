@@ -14,17 +14,13 @@ async function factory() {
     logger.info('Logger ready.');
     process.on('uncaughtException', (err) => {
         console.error(`Uncaught exception!`, err);
-        setTimeout(() => process.exit(1), 250);
-        logger.fatal(err, `Uncaught exception!`);
-        // TODO cleanup
-        // I've an experimental module for that…
+        logger.error({ err }, `Uncaught exception!`);
+        // no crash while we are stateless
     });
     process.on('unhandledRejection', (reason, p) => {
         console.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
-        setTimeout(() => process.exit(1), 250);
-        logger.fatal({ reason, p }, `Uncaught rejection!`);
-        // TODO cleanup
-        // I've an experimental module for that…
+        logger.error({ reason, p }, `Uncaught rejection!`);
+        // no crash while we are stateless
     });
     process.on('warning', (warning) => {
         console.warn(warning);
