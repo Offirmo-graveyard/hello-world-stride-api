@@ -22,14 +22,20 @@ const APP_ID = 'stride-app-demo'
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, env, clientId, clientSecret } = Object.assign({}, defaultDependencies, dependencies)
-	logger.debug(`${APP_ID}: Initializing the Demo Stride bot…`)
+	logger.debug(`${APP_ID}: Initializing the bot…`)
 
 	if (!clientId || !clientSecret) {
 		console.log(prettify_json(process.env))
 		throw new Error(`${APP_ID}: missing stride API credentials!`)
 	}
 
-	const stride = stride_factory({clientId, clientSecret, logger: logger as any as Console, env})
+	const stride = stride_factory({
+		clientId,
+		clientSecret,
+		logger: logger as any as Console,
+		env,
+		debugId: `${APP_ID}stride.js`
+	})
 	// preload the token (async)
 	stride.getAccessToken()
 
@@ -43,6 +49,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		let logDetails: any = {
 			endpoint: req.path,
 			method: req.method,
+			APP_ID,
 		};
 
 		(async function process() {
@@ -64,6 +71,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	app.post('/uninstalled', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
+			APP_ID,
 			endpoint: req.path,
 			method: req.method,
 		};
@@ -87,6 +95,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	app.post('/bot-mentioned', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
+			APP_ID,
 			endpoint: req.path,
 			method: req.method,
 		};
@@ -107,7 +116,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			console.log('------\nfull body\n', prettify_json(req.body))
 			console.log('------\ndocument\n', prettify_json(document))
 
-			/*stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
+			stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
 			stride.sendDocumentMessage({
 				cloudId,
 				conversationId,
@@ -121,7 +130,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			stride.getConversation({cloudId, conversationId}).then(conversation => {
 				console.log('getConversation():\n', prettify_json(conversation))
 				return stride.sendTextMessage({cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!`})
-			})*/
+			})
 			stride.getUser({cloudId, userId: senderId}).then(user => {
 				console.log('getUser():\n', prettify_json(user))
 				const documentMessage = {
@@ -153,9 +162,9 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 					documentMessage /*: stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`) */
 				})
 			})
-			/*stride.convertDocToText(document).then(msg => {
+			stride.convertDocToText(document).then(msg => {
 				return stride.sendTextMessage({cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?`})
-			})*/
+			})
 			/*
 			stride.createConversation({
 				cloudId,
@@ -177,6 +186,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	app.post('/bot-directly-messaged', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
+			APP_ID,
 			endpoint: req.path,
 			method: req.method,
 		};

@@ -31,6 +31,8 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	router.use('/chucknorris', await chuckNorrisFactory({
 		logger,
+		clientId: process.env.STRIDE_APP_CHUCK_NORRIS_STRIDE_API_CLIENT_ID,
+		clientSecret: process.env.STRIDE_APP_CHUCK_NORRIS_STRIDE_API_CLIENT_SECRET,
 	}))
 
 	return router

@@ -5,21 +5,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const request = require('request');
 //const jwtUtil = require('jwt-simple')
 // TODO add validation middlewares
-function factory({ clientId, clientSecret, logger = console, env = 'development' }) {
+function factory({ clientId, clientSecret, logger = console, env = 'development', debugId = 'stride.js' }) {
     const API_BASE_URL = env === "production" ? 'https://api.atlassian.com' : 'https://api.stg.atlassian.com';
     const API_AUDIENCE = env === "production" ? "api.atlassian.com" : "api.stg.atlassian.com";
     const AUTH_API_BASE_URL = env === "production" ? 'https://auth.atlassian.com' : 'https://atlassian-account-stg.pus2.auth0.com';
     function r2(options) {
         let logDetails = Object.assign({}, options);
         return new Promise((resolve, reject) => {
-            logger.info(Object.assign({}, logDetails), 'stride layer: requesting...');
+            logger.info(Object.assign({}, logDetails), `${debugId}: requesting...`);
             request(options, (err, response, body) => {
                 if (err) {
-                    logger.error(Object.assign({}, logDetails, { err }), 'stride layer request failed!');
+                    logger.error(Object.assign({}, logDetails, { err }), `${debugId}: request failed!`);
                     return reject(err);
                 }
                 if (!response || response.statusCode >= 399) {
-                    logger.error(Object.assign({}, logDetails, response, { err }), 'stride layer request failed with an error response!');
+                    logger.error(Object.assign({}, logDetails, response, { err }), `${debugId}: request failed with an error response!`);
                     return reject(new Error('Request failed'));
                 }
                 resolve(body);
@@ -55,7 +55,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
             .then(token => {
             // remember to refresh the token a minute before it expires (tokens last for an hour)
             token.refresh_time = Date.now() + (token.expires_in - 60) * 1000;
-            logger.info(Object.assign({}, token), 'stride layer: got a token.');
+            logger.info(Object.assign({}, token), `${debugId}: got a token.`);
             return token.access_token;
         });
         return accessTokenPromise;
@@ -199,9 +199,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
             },
             body: stream
         };
-        return r2(options).then(() => {
-            logger.info(`uploaded file`);
-        });
+        return r2(options);
     }
     /**
      *

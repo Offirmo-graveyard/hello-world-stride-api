@@ -1,8 +1,28 @@
 {
-	"baseUrl": "http://f564e955.ngrok.io/chucknorris",
+	"baseUrl": "https://7282ab55.ngrok.io/chucknorris",
 	"key": "chuck-norris-app",
 	"lifecycle": {
 		"installed": "/installed",
 		"uninstalled": "/uninstalled"
+	},
+	"modules": {
+		"chat:bot": [
+			{
+				"key": "chuck-norris-bot",
+				"mention": {
+					"url": "/bot-mentioned"
+				},
+				"directMessage": {
+					"url": "/bot-directly-messaged"
+				}
+			}
+		],
+		"chat:bot:messages": [
+			{
+				"key": "chuck-norris-bot-message-CNF",
+				"pattern": "CNF",
+				"url": "/bot-mentioned"
+			}
+		]
 	}
 }

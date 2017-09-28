@@ -12,12 +12,18 @@ const defaultDependencies = {
 const APP_ID = 'stride-app-demo';
 async function factory(dependencies = {}) {
     const { logger, env, clientId, clientSecret } = Object.assign({}, defaultDependencies, dependencies);
-    logger.debug(`${APP_ID}: Initializing the Demo Stride bot…`);
+    logger.debug(`${APP_ID}: Initializing the bot…`);
     if (!clientId || !clientSecret) {
         console.log(misc_1.prettify_json(process.env));
         throw new Error(`${APP_ID}: missing stride API credentials!`);
     }
-    const stride = stride_1.factory({ clientId, clientSecret, logger: logger, env });
+    const stride = stride_1.factory({
+        clientId,
+        clientSecret,
+        logger: logger,
+        env,
+        debugId: `${APP_ID}stride.js`
+    });
     // preload the token (async)
     stride.getAccessToken();
     const app = express();
@@ -28,6 +34,7 @@ async function factory(dependencies = {}) {
         let logDetails = {
             endpoint: req.path,
             method: req.method,
+            APP_ID,
         };
         (async function process() {
             const { cloudId, resourceId: conversationId, userId } = req.body;
@@ -42,6 +49,7 @@ async function factory(dependencies = {}) {
     });
     app.post('/uninstalled', (req, res, next) => {
         let logDetails = {
+            APP_ID,
             endpoint: req.path,
             method: req.method,
         };
@@ -58,6 +66,7 @@ async function factory(dependencies = {}) {
     });
     app.post('/bot-mentioned', (req, res, next) => {
         let logDetails = {
+            APP_ID,
             endpoint: req.path,
             method: req.method,
         };
@@ -71,21 +80,21 @@ async function factory(dependencies = {}) {
             logger.info(logDetails, 'bot mentioned in a conversation');
             console.log('------\nfull body\n', misc_1.prettify_json(req.body));
             console.log('------\ndocument\n', misc_1.prettify_json(document));
-            /*stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
+            stride.sendTextMessage({ cloudId, conversationId, text: '"stride.sendTextMessage()"' });
             stride.sendDocumentMessage({
                 cloudId,
                 conversationId,
                 documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
-            })
+            });
             stride.sendUserMessage({
                 cloudId,
                 userId: senderId,
                 documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
-            })
-            stride.getConversation({cloudId, conversationId}).then(conversation => {
-                console.log('getConversation():\n', prettify_json(conversation))
-                return stride.sendTextMessage({cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!`})
-            })*/
+            });
+            stride.getConversation({ cloudId, conversationId }).then(conversation => {
+                console.log('getConversation():\n', misc_1.prettify_json(conversation));
+                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.getConversation(): nice room "${conversation.name}"!` });
+            });
             stride.getUser({ cloudId, userId: senderId }).then(user => {
                 console.log('getUser():\n', misc_1.prettify_json(user));
                 const documentMessage = {
@@ -116,9 +125,9 @@ async function factory(dependencies = {}) {
                     documentMessage /*: stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`) */
                 });
             });
-            /*stride.convertDocToText(document).then(msg => {
-                return stride.sendTextMessage({cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?`})
-            })*/
+            stride.convertDocToText(document).then(msg => {
+                return stride.sendTextMessage({ cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?` });
+            });
             /*
             stride.createConversation({
                 cloudId,
@@ -138,6 +147,7 @@ async function factory(dependencies = {}) {
     });
     app.post('/bot-directly-messaged', (req, res, next) => {
         let logDetails = {
+            APP_ID,
             endpoint: req.path,
             method: req.method,
         };

@@ -22,6 +22,8 @@ async function factory(dependencies = {}) {
     }));
     router.use('/chucknorris', await chucknorris_1.factory({
         logger,
+        clientId: process.env.STRIDE_APP_CHUCK_NORRIS_STRIDE_API_CLIENT_ID,
+        clientSecret: process.env.STRIDE_APP_CHUCK_NORRIS_STRIDE_API_CLIENT_SECRET,
     }));
     return router;
 }
