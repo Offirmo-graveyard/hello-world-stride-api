@@ -1,25 +1,32 @@
 {
-	"baseUrl": "https://7282ab55.ngrok.io/demo",
-	"key": "demo-app",
+	"baseUrl": "http://2a005b11.ngrok.io/demo",
+	"key": "app",
 	"lifecycle": {
-		"installed": "/installed",
-		"uninstalled": "/uninstalled"
+		"installed": "/on-app-installed",
+		"uninstalled": "/on-app-uninstalled"
 	},
 	"modules": {
 		"chat:bot": [
 			{
-				"key": "demo-bot",
+				"key": "bot",
 				"mention": {
-					"url": "/bot-mentioned"
+					"url": "/on-bot-mentioned"
 				},
 				"directMessage": {
-					"url": "/bot-directly-messaged"
+					"url": "/on-bot-directly-messaged"
 				}
+			}
+		],
+		"chat:bot:messages": [
+			{
+				"key": "bot-message-any",
+				"pattern": ".*",
+				"url": "/on-any-message"
 			}
 		],
 		"chat:sidebar": [
 			{
-				"key": "demo-app-sidebar",
+				"key": "app-sidebar",
 				"name": {
 					"value": "App Sidebar"
 				},
@@ -29,7 +36,7 @@
 		],
 		"chat:glance": [
 			{
-				"key": "demo-app-glance",
+				"key": "app-glance",
 				"name": {
 					"value": "App Glance"
 				},
@@ -37,7 +44,7 @@
 					"url": "/logo.png",
 					"url@2x": "/logo.png"
 				},
-				"target": "demo-app-sidebar",
+				"target": "app-sidebar",
 				"queryUrl": "/glance-state",
 				"authentication": "jwt"
 			}

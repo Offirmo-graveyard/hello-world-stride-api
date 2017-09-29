@@ -266,8 +266,41 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
     /**
      * Utility functions
      */
-    function sendTextMessage({ cloudId, conversationId, text }) {
+    async function sendTextMessage({ cloudId, conversationId, text }) {
         return sendDocumentMessage({ cloudId, conversationId, documentMessage: convertTextToDoc(text) });
+    }
+    /** with a @mention
+     *
+     */
+    async function sendTextMessageDirectedToUser({ cloudId, conversationId, userId, text }) {
+        const user = await getUser({ cloudId, userId });
+        const documentMessage = {
+            version: 1,
+            type: "doc",
+            content: [
+                {
+                    type: "paragraph",
+                    content: [
+                        {
+                            type: "mention",
+                            attrs: {
+                                id: user.id,
+                                text: user.nickName || user.displayName,
+                            }
+                        },
+                        {
+                            type: "text",
+                            text: ' ' + text,
+                        },
+                    ],
+                },
+            ],
+        };
+        return sendDocumentMessage({
+            cloudId,
+            conversationId,
+            documentMessage,
+        });
     }
     // not sure that works!
     async function sendDocumentReply({ message, reply }) {
@@ -336,7 +369,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
         const encodedJwt = req.query['jwt']
             || req.headers['authorization'].substring(7)
             || req.headers['Authorization'].substring(7);
-        console.log({ encodedJwt });
+        //console.log({encodedJwt})
         if (!encodedJwt) {
             return null;
         }
@@ -346,7 +379,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
         return jwt;
     }
     function validateJWT(req, res, next) {
-        console.log('validateJWT');
+        //console.log('validateJWT')
         let logDetails = {
             debugId,
             endpoint: req.path,
@@ -354,12 +387,13 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
         };
         try {
             const jwt = getJWT(req);
-            console.log('---- JWT ---\n', jwt.decoded, '----\n');
+            // TODO if !jwt
+            //console.log('---- JWT ---\n', jwt.decoded, '----\n')
             // Validate the token signature using the app's OAuth secret (created in DAC App Management)
             // (to ensure the call comes from Stride)
             jwtUtil.decode(jwt.encoded, clientSecret);
-            //all good, it's from Stride
-            logger.info(Object.assign({}, logDetails), 'JWT OK');
+            // all good, it's from Stride
+            //logger.info({...logDetails}, 'JWT OK')
             // if any, add the context to a local variable
             if (jwt.decoded.context) {
                 const conversationId = jwt.decoded.context.resourceId;
@@ -372,6 +406,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
         }
         catch (err) {
             logger.warn(Object.assign({}, logDetails, { err }), 'Invalid JWT');
+            // TODO clean that
             //res.sendStatus(403)
             next();
         }
@@ -391,6 +426,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
         getUser,
         // utilities
         sendTextMessage,
+        sendTextMessageDirectedToUser,
         sendDocumentReply,
         sendTextReply,
         convertDocToText,

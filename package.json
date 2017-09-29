@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@offirmo/loggers-types-and-stubs": "^0.0.3",
+    "@offirmo/random": "^2.0.4",
     "body-parser": "^1.17.1",
     "boxen": "^1.2.1",
     "bunyan": "^1.8.10",

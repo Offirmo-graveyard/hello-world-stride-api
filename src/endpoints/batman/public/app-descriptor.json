@@ -1,0 +1,53 @@
+{
+	"baseUrl": "http://2a005b11.ngrok.io/batman",
+	"key": "app",
+	"lifecycle": {
+		"installed": "/on-app-installed",
+		"uninstalled": "/on-app-uninstalled"
+	},
+	"modules": {
+		"chat:bot": [
+			{
+				"key": "bot",
+				"mention": {
+					"url": "/on-bot-mentioned"
+				},
+				"directMessage": {
+					"url": "/on-bot-directly-messaged"
+				}
+			}
+		],
+		"chat:bot:messages": [
+			{
+				"key": "bot-message-any",
+				"pattern": ".*",
+				"url": "/on-any-message"
+			}
+		],
+		"chat:sidebar": [
+			{
+				"key": "app-sidebar",
+				"name": {
+					"value": "App Sidebar"
+				},
+				"url": "/sidebar.html",
+				"authentication": "jwt"
+			}
+		],
+		"chat:glance": [
+			{
+				"key": "app-glance",
+				"name": {
+					"value": "App Glance"
+				},
+				"icon": {
+					"url": "/logo.png",
+					"url@2x": "/logo.png"
+				},
+				"target": "app-sidebar",
+				"queryUrl": "/glance-state",
+				"authentication": "jwt"
+			}
+		]
+	}
+}

@@ -304,8 +304,44 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 	 * Utility functions
 	 */
 
-	function sendTextMessage({cloudId, conversationId, text}) {
+	async function sendTextMessage({cloudId, conversationId, text}) {
 		return sendDocumentMessage({cloudId, conversationId, documentMessage: convertTextToDoc(text)})
+	}
+
+	/** with a @mention
+	 *
+	 */
+	async function sendTextMessageDirectedToUser({cloudId, conversationId, userId, text}) {
+		const user = await getUser({cloudId, userId})
+
+		const documentMessage = {
+			version: 1,
+			type: "doc",
+			content: [
+				{
+					type: "paragraph",
+					content: [
+						{
+							type: "mention",
+							attrs: {
+								id: user.id,
+								text: user.nickName || user.displayName,
+							}
+						},
+						{
+							type: "text",
+							text: ' ' + text,
+						},
+					],
+				},
+			],
+		}
+
+		return sendDocumentMessage({
+			cloudId,
+			conversationId,
+			documentMessage,
+		})
 	}
 
 	// not sure that works!
@@ -385,7 +421,7 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 			|| req.headers['authorization'].substring(7)
 			|| req.headers['Authorization'].substring(7)
 
-		console.log({encodedJwt})
+		//console.log({encodedJwt})
 		if  (!encodedJwt) {
 			return null
 		}
@@ -399,7 +435,7 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 	}
 
 	function validateJWT(req, res, next) {
-		console.log('validateJWT')
+		//console.log('validateJWT')
 		let logDetails = {
 			debugId,
 			endpoint: req.path,
@@ -408,15 +444,16 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 
 		try {
 			const jwt = getJWT(req)
+			// TODO if !jwt
 
-			console.log('---- JWT ---\n', jwt.decoded, '----\n')
+			//console.log('---- JWT ---\n', jwt.decoded, '----\n')
 
 			// Validate the token signature using the app's OAuth secret (created in DAC App Management)
 			// (to ensure the call comes from Stride)
 			jwtUtil.decode(jwt.encoded, clientSecret)
 
-			//all good, it's from Stride
-			logger.info({...logDetails}, 'JWT OK')
+			// all good, it's from Stride
+			//logger.info({...logDetails}, 'JWT OK')
 
 			// if any, add the context to a local variable
 			if (jwt.decoded.context) {
@@ -433,6 +470,7 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 			next()
 		} catch (err) {
 			logger.warn({...logDetails, err}, 'Invalid JWT')
+			// TODO clean that
 			//res.sendStatus(403)
 			next()
 		}
@@ -459,6 +497,7 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 
 		// utilities
 		sendTextMessage,
+		sendTextMessageDirectedToUser,
 		sendDocumentReply,
 		sendTextReply,
 		convertDocToText,

@@ -1,27 +1,52 @@
 {
-	"baseUrl": "https://7282ab55.ngrok.io/chucknorris",
-	"key": "chuck-norris-app",
+	"baseUrl": "http://2a005b11.ngrok.io/chucknorris",
+	"key": "app",
 	"lifecycle": {
-		"installed": "/installed",
-		"uninstalled": "/uninstalled"
+		"installed": "/on-app-installed",
+		"uninstalled": "/on-app-uninstalled"
 	},
 	"modules": {
 		"chat:bot": [
 			{
-				"key": "chuck-norris-bot",
+				"key": "bot",
 				"mention": {
-					"url": "/bot-mentioned"
+					"url": "/on-bot-mentioned"
 				},
 				"directMessage": {
-					"url": "/bot-directly-messaged"
+					"url": "/on-bot-directly-messaged"
 				}
 			}
 		],
 		"chat:bot:messages": [
 			{
-				"key": "chuck-norris-bot-message-CNF",
-				"pattern": "CNF",
-				"url": "/bot-mentioned"
+				"key": "bot-message-any",
+				"pattern": ".*",
+				"url": "/on-any-message"
+			}
+		],
+		"chat:sidebar": [
+			{
+				"key": "app-sidebar",
+				"name": {
+					"value": "App Sidebar"
+				},
+				"url": "/sidebar.html",
+				"authentication": "jwt"
+			}
+		],
+		"chat:glance": [
+			{
+				"key": "app-glance",
+				"name": {
+					"value": "App Glance"
+				},
+				"icon": {
+					"url": "/logo.png",
+					"url@2x": "/logo.png"
+				},
+				"target": "app-sidebar",
+				"queryUrl": "/glance-state",
+				"authentication": "jwt"
 			}
 		]
 	}

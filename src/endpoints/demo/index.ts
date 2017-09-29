@@ -34,7 +34,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		clientSecret,
 		logger: logger as any as Console,
 		env,
-		debugId: `${APP_ID}stride.js`
+		debugId: `${APP_ID} stride.js`
 	})
 	// preload the token (async)
 	stride.getAccessToken()
@@ -47,7 +47,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	app.use(stride.validateJWT)
 
-	app.post('/installed', (req: ExtendedRequest, res, next) => {
+	app.post('/on-app-installed', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
 			endpoint: req.path,
 			method: req.method,
@@ -66,12 +66,20 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			logger.info(logDetails,'app installed in a conversation')
 			console.log(prettify_json(req.body))
 
+			stride.getConversation({cloudId, conversationId}).then(conversation => {
+				stride.sendTextMessage({
+					cloudId,
+					conversationId,
+					text: `${APP_ID} I've been installed in conversation "${conversation.name}".`
+				})
+			})
+
 			res.sendStatus(204)
 		})()
 			.catch(next)
 	})
 
-	app.post('/uninstalled', (req: ExtendedRequest, res, next) => {
+	app.post('/on-app-uninstalled', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
 			APP_ID,
 			endpoint: req.path,
@@ -90,12 +98,14 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			logger.info(logDetails,'app uninstalled from a conversation')
 			console.log(prettify_json(req.body))
 
+			// Note: we can't post
+
 			res.sendStatus(204)
 		})()
 			.catch(next)
 	})
 
-	app.post('/bot-mentioned', (req: ExtendedRequest, res, next) => {
+	app.post('/on-bot-mentioned', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
 			APP_ID,
 			endpoint: req.path,
@@ -119,7 +129,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			//console.log('------\ndocument\n', prettify_json(document))
 
 			stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
-			/*stride.sendDocumentMessage({
+			stride.sendDocumentMessage({
 				cloudId,
 				conversationId,
 				documentMessage: stride.convertTextToDoc('"stride.sendDocumentMessage()"')
@@ -150,7 +160,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 									type: "mention",
 									attrs: {
 										id: user.id,
-										text: user.nickName
+										text: user.nickName || user.displayName
 									}
 								}
 							]
@@ -161,13 +171,13 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 				return stride.sendDocumentMessage({
 					cloudId,
 					conversationId,
-					documentMessage : stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`)
+					documentMessage,
+					//documentMessage : stride.convertTextToDoc(`stride.getUser(): I'll remember that you said "${text}", "${user.displayName}"!`)
 				})
 			})
 			stride.convertDocToText(document).then(msg => {
 				return stride.sendTextMessage({cloudId, conversationId, text: `stride.convertDocToText(): was your message "${msg}"?`})
 			})
-	*/
 			/*
 			stride.createConversation({
 				cloudId,
@@ -187,7 +197,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			.catch(next)
 	})
 
-	app.post('/bot-directly-messaged', (req: ExtendedRequest, res, next) => {
+	app.post('/on-bot-directly-messaged', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
 			APP_ID,
 			endpoint: req.path,
@@ -222,19 +232,42 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			.catch(next)
 	})
 
-	app.get('/glance-state',
-		// cross domain request
-		//cors(),
-		function (req, res) {
-			res.send(
-				JSON.stringify({
-					"label": {
-						"value": "Click me!"
-					}
-				}));
-		});
+	app.post('/on-any-message', (req: ExtendedRequest, res, next) => {
+		let logDetails: any = {
+			APP_ID,
+			endpoint: req.path,
+			method: req.method,
+		};
 
-	app.post('/custom-request', (req: ExtendedRequest, res, next) => {
+		(async function process() {
+			const { cloudId, message: {text} } = req.body
+			const conversationId = req.body.conversation.id
+			const senderId = req.body.message.sender.id
+
+			logDetails = {
+				...logDetails,
+				cloudId,
+				conversationId,
+				senderId,
+			}
+
+			logger.info(logDetails,'bot saw any message in a conversation')
+
+			if (text && text.includes('foo')) {
+				stride.sendTextMessageDirectedToUser({
+					cloudId,
+					conversationId,
+					userId: senderId,
+					text: `you said "${text}".`,
+				})
+			}
+
+			res.sendStatus(204)
+		})()
+			.catch(next)
+	})
+
+	app.post('/on-custom-request', (req: ExtendedRequest, res, next) => {
 		let logDetails: any = {
 			APP_ID,
 			endpoint: req.path,
@@ -249,13 +282,53 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			logger.info(logDetails,'bot received a custom request')
 			console.log('------\nfull body\n', prettify_json(req.body))
 
-			stride.sendTextMessage({cloudId, conversationId, text: '"stride.sendTextMessage()"'})
+
+			stride.getUser({cloudId, userId: senderId})
+				.then(user => {
+					console.log('getUser():\n', prettify_json(user))
+					const documentMessage = {
+						version: 1,
+						type: "doc",
+						content: [
+							{
+								type: "paragraph",
+								content: [
+									{
+										type: "text",
+										text: `[custom request "${requestId}" from "${user.nickName || user.displayName}"]`,
+									},
+									{
+										type: "mention",
+										attrs: {
+											id: user.id,
+											text: user.nickName || user.displayName,
+										}
+									},
+								],
+							},
+						],
+					}
+
+					return stride.sendDocumentMessage({
+						cloudId,
+						conversationId,
+						documentMessage,
+					})
+				})
 
 			res.sendStatus(204)
 		})()
 			.catch(next)
 	})
 
+	app.get('/glance-state', /*cors(),*/function (req, res) {
+		res.send(
+			JSON.stringify({
+				"label": {
+					"value": "Click me!"
+				}
+			}));
+	});
 
 	return app
 }
