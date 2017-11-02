@@ -319,7 +319,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
      * see https://developer.atlassian.com/cloud/stride/apis/document/structure/
      * Note: useless since we have that in message.text
      */
-    async function convertDocToText(document) {
+    async function convertDocToText({document}) {
         const accessToken = await getAccessToken();
         const options = {
             uri: API_BASE_URL + '/pf-editor-service/render',
@@ -333,6 +333,8 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
         };
         return r2(options);
     }
+
+    // opposite
     function convertTextToDoc(text) {
         return {
             version: 1,
@@ -350,6 +352,7 @@ function factory({ clientId, clientSecret, logger = console, env = 'development'
             ],
         };
     }
+
     /**
      * Securing your app with JWT
      * --------------------------

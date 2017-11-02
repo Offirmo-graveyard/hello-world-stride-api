@@ -509,9 +509,6 @@ function factory({clientId, clientSecret, logger = console, env = 'development',
 }
 
 
-
-
-
 export {
 	factory,
 }
